@@ -1,0 +1,251 @@
+#style.css
+
+/* === General Body & Typography === */
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* === Navbar === */
+.navbar {
+  background-color: #1f1f1f;
+  padding: 1rem 0;
+  border-bottom: 1px solid #333;
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.nav-links li {
+  font-size: 1rem;
+}
+
+.nav-links a {
+  color: #bbb;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.nav-links a:hover,
+.nav-links a:focus {
+  color: #1e90ff;
+  outline: none;
+}
+
+/* === Flash messages (alerts) === */
+.flash-messages {
+  margin-bottom: 1rem;
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 5px;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+}
+
+.alert-success {
+  background-color: #2e7d32; /* dark green */
+  color: #c8facc;
+}
+
+.alert-danger {
+  background-color: #c62828; /* dark red */
+  color: #f9bdbb;
+}
+
+.alert-info {
+  background-color: #1565c0; /* dark blue */
+  color: #cce4f7;
+}
+
+/* === Forms === */
+form {
+  background-color: #222;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+  max-width: 400px;
+  margin: 0 auto 2rem auto;
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  color: #ddd;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="email"],
+form input[type="number"],
+form textarea,
+form select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background-color: #1a1a1a;
+  color: #eee;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+form input[type="text"]:focus,
+form input[type="password"]:focus,
+form input[type="email"]:focus,
+form input[type="number"]:focus,
+form textarea:focus,
+form select:focus {
+  outline: none;
+  border-color: #1e90ff;
+  background-color: #121212;
+  color: #fff;
+}
+
+/* === Buttons === */
+button,
+input[type="submit"],
+input[type="button"] {
+  background-color: #1e90ff;
+  border: none;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1rem;
+}
+
+button:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover {
+  background-color: #0f6cd9;
+}
+
+button:disabled,
+input[type="submit"]:disabled,
+input[type="button"]:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+/* === Tables === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 2rem;
+  background-color: #1a1a1a;
+  color: #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(255,255,255,0.05);
+}
+
+th, td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #333;
+  text-align: left;
+}
+
+th {
+  background-color: #222;
+  font-weight: 700;
+}
+
+tr:hover {
+  background-color: #333;
+}
+
+/* === Links in tables/buttons === */
+a.btn-link {
+  color: #1e90ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+a.btn-link:hover {
+  text-decoration: underline;
+  color: #0f6cd9;
+}
+
+/* === Main content === */
+.main-content {
+  padding: 2rem 0;
+}
+
+/* === Footer === */
+.footer {
+  background-color: #1f1f1f;
+  padding: 1rem 0;
+  text-align: center;
+  color: #777;
+  border-top: 1px solid #333;
+  margin-top: 3rem;
+  font-size: 0.9rem;
+}
+
+/* === Scrollbar for better visibility === */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #121212;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #1e90ff;
+  border-radius: 10px;
+  border: 2px solid #121212;
+}
+
+/* === Responsive tweaks === */
+@media (max-width: 600px) {
+  .navbar .container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  form {
+    width: 90%;
+  }
+}

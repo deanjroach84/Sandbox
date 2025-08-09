@@ -1,0 +1,15 @@
+#render.yaml
+
+services:
+  - type: web
+    name: flask-port-scanner
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///instance/app.db
+    autoDeploy: true

@@ -1,0 +1,21 @@
+#scan_history.html
+
+{% extends "base.html" %}
+{% block title %}Scan History{% endblock %}
+{% block content %}
+<h1>Your Scan History</h1>
+<table>
+    <tr>
+        <th>Target</th>
+        <th>Result</th>
+        <th>Date</th>
+    </tr>
+    {% for scan in scans %}
+    <tr>
+        <td>{{ scan.target }}</td>
+        <td>{{ scan.result }}</td>
+        <td>{{ scan.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
