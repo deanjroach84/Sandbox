@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Length, Email, EqualTo
-
+from wtforms import StringField, PasswordField, IntegerField, SubmitField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange
 
 class LoginForm(FlaskForm):
     email = StringField(
@@ -40,4 +39,12 @@ class ScanForm(FlaskForm):
         'Target IP or Domain',
         validators=[DataRequired()]
     )
-    submit = SubmitField('Scan')
+    start_port = IntegerField(
+        'Start Port',
+        validators=[DataRequired(), NumberRange(min=1, max=65535)]
+    )
+    end_port = IntegerField(
+        'End Port',
+        validators=[DataRequired(), NumberRange(min=1, max=65535)]
+    )
+    submit = SubmitField('Start Scan')
