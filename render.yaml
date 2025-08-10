@@ -17,6 +17,6 @@ services:
         value: sqlite:///instance/app.db
       - key: SESSION_TIMEOUT
         value: "1800"
-      - key: PYTHON_VERSION
-        value: 3.11
+      # - key: PYTHON_VERSION
+      # value: 3.11
     
