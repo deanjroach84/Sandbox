@@ -1,30 +1,43 @@
-#forms.py
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Length, EqualTo, ValidationError
-from flask_wtf.recaptcha import RecaptchaField
+from wtforms.validators import DataRequired, Length, Email, EqualTo
+
 
 class LoginForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=25)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
+    email = StringField(
+        'Email',
+        validators=[DataRequired(), Email(message='Invalid email address')]
+    )
+    password = PasswordField(
+        'Password',
+        validators=[DataRequired()]
+    )
     submit = SubmitField('Login')
 
+
 class RegisterForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=25)])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm Password', validators=[
-        DataRequired(),
-        EqualTo('password', message='Passwords must match')
-    ])
-    recaptcha = RecaptchaField()
+    username = StringField(
+        'Username',
+        validators=[DataRequired(), Length(min=3, max=25)]
+    )
+    email = StringField(
+        'Email',
+        validators=[DataRequired(), Email()]
+    )
+    password = PasswordField(
+        'Password',
+        validators=[DataRequired(), Length(min=6)]
+    )
+    confirm_password = PasswordField(
+        'Confirm Password',
+        validators=[DataRequired(), EqualTo('password')]
+    )
     submit = SubmitField('Register')
 
-class ForgotPasswordForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=25)])
-    new_password = PasswordField('New Password', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField('Confirm New Password', validators=[
-        DataRequired(),
-        EqualTo('new_password', message='Passwords must match')
-    ])
-    submit = SubmitField('Reset Password')
+
+class ScanForm(FlaskForm):
+    target = StringField(
+        'Target IP or Domain',
+        validators=[DataRequired()]
+    )
+    submit = SubmitField('Scan')
