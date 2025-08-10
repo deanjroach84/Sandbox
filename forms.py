@@ -3,14 +3,11 @@ from wtforms import StringField, PasswordField, IntegerField, SubmitField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, NumberRange
 
 class LoginForm(FlaskForm):
-    email = StringField(
-        'Email',
-        validators=[DataRequired(), Email(message='Invalid email address')]
+    username = StringField(
+        'Username',
+        validators=[DataRequired(), Length(min=3, max=25)]
     )
-    password = PasswordField(
-        'Password',
-        validators=[DataRequired()]
-    )
+    password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 
