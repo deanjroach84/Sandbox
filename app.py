@@ -25,20 +25,24 @@ login_manager.login_view = 'login'
 limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 limiter.init_app(app)
 
+
+def create_tables_and_admin():
+    with app.app_context():
+        db.create_all()
+        admin = User.query.filter_by(username="admin").first()
+        if not admin:
+            hashed_pw = generate_password_hash("admin123", method='sha256')
+            admin = User(username="admin", password=hashed_pw, is_admin=True)
+            db.session.add(admin)
+            db.session.commit()
+
+
+create_tables_and_admin()
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-@app.before_first_request
-def create_tables():
-    db.create_all()
-    admin = User.query.filter_by(username="admin").first()
-    if not admin:
-        hashed_pw = generate_password_hash("admin123", method='sha256')
-        admin = User(username="admin", password=hashed_pw, is_admin=True)
-        db.session.add(admin)
-        db.session.commit()
 
 
 @app.route('/')
