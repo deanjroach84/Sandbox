@@ -7,9 +7,14 @@ services:
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
+    autoDeploy: true
     envVars:
+      - key: FLASK_ENV 
+        value: production
       - key: SECRET_KEY
         value: 9ba75b2f9bff26db1cd421411d3aa0f33c43921d6b21b597f1ddbe70aa2a56df
       - key: DATABASE_URL
         value: sqlite:///instance/app.db
-    autoDeploy: true
+      - key: SESSION_TIMEOUT
+        value: "1800"
+    
