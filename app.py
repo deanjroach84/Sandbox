@@ -1,3 +1,5 @@
+#app.py
+
 import os
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -12,6 +14,10 @@ import json
 from models import db, User, Scan
 from forms import LoginForm, RegisterForm, ScanForm
 from network_utils import scan_ports_thread
+
+# Ensure 'instance' directory exists before DB init
+instance_path = os.path.join(os.path.dirname(__file__), 'instance')
+os.makedirs(instance_path, exist_ok=True)
 
 app = Flask(__name__)
 app.config.from_object('config.Config')
@@ -55,7 +61,7 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.email.data).first()
+        user = User.query.filter_by(username=form.username.data).first()  # fix: was form.email.data
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for('index'))
