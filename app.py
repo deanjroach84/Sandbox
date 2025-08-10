@@ -1,65 +1,35 @@
-#app.py
-
 import os
-import sqlite3
-from flask import Flask, render_template, redirect, url_for, flash, request, send_file
+from flask import Flask, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
-from forms import LoginForm, RegisterForm, ScanForm
-from network_utils import run_scan, dns_lookup, reverse_ip_lookup, traceroute, whois_lookup, subdomain_enum
-from io import BytesIO
-import csv
+from threading import Thread
 import json
-from fpdf import FPDF
 
-# Flask app initialization
+from models import db, User, Scan
+from forms import LoginForm, RegisterForm, ScanForm
+from network_utils import scan_ports_thread
+
 app = Flask(__name__)
 app.config.from_object('config.Config')
 
-# Database
-db = SQLAlchemy(app)
-
-# CSRF
+db.init_app(app)
 csrf = CSRFProtect(app)
 
-# Login manager
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Limiter
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
+limiter = Limiter(key_func=get_remote_address, default_limits=["200 per day", "50 per hour"])
 limiter.init_app(app)
 
-
-# MODELS
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
-
-
-class ScanHistory(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    target = db.Column(db.String(255), nullable=False)
-    result = db.Column(db.Text, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-
-# LOGIN LOADER
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-# Ensure admin exists
 @app.before_first_request
 def create_tables():
     db.create_all()
@@ -71,7 +41,6 @@ def create_tables():
         db.session.commit()
 
 
-# ROUTES
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -82,7 +51,7 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
+        user = User.query.filter_by(username=form.email.data).first()
         if user and check_password_hash(user.password, form.password.data):
             login_user(user)
             return redirect(url_for('index'))
@@ -115,59 +84,32 @@ def logout():
 def scan():
     form = ScanForm()
     if form.validate_on_submit():
-        target = form.target.data
-        scan_type = form.scan_type.data
-        result = ""
+        target_ip = form.target.data.strip()
+        start_port = form.start_port.data
+        end_port = form.end_port.data
 
-        if scan_type == "port":
-            result = run_scan(target)
-        elif scan_type == "dns":
-            result = dns_lookup(target)
-        elif scan_type == "reverse":
-            result = reverse_ip_lookup(target)
-        elif scan_type == "traceroute":
-            result = traceroute(target)
-        elif scan_type == "whois":
-            result = whois_lookup(target)
-        elif scan_type == "subdomain":
-            result = subdomain_enum(target)
+        if start_port > end_port:
+            flash("Start port must be less than or equal to end port.", "danger")
+            return render_template('scan.html', form=form)
 
-        history = ScanHistory(target=target, result=str(result), user_id=current_user.id)
-        db.session.add(history)
+        new_scan = Scan(
+            user_id=current_user.id,
+            target_ip=target_ip,
+            start_port=start_port,
+            end_port=end_port,
+            open_ports=json.dumps([])
+        )
+        db.session.add(new_scan)
         db.session.commit()
 
-        return render_template('scan_history.html', scans=[history])
-    return render_template('index.html', form=form)
+        thread = Thread(target=scan_ports_thread, args=(new_scan.id,))
+        thread.daemon = True
+        thread.start()
 
-
-@app.route('/scan_history')
-@login_required
-def scan_history():
-    scans = ScanHistory.query.filter_by(user_id=current_user.id).all()
-    return render_template('scan_history.html', scans=scans)
-
-
-@app.route('/admin')
-@login_required
-def admin():
-    if not current_user.is_admin:
-        flash("Access denied", "danger")
+        flash(f"Scan started for {target_ip} ports {start_port}-{end_port}", "success")
         return redirect(url_for('index'))
-    users = User.query.all()
-    return render_template('admin.html', users=users)
 
-
-@app.route('/delete_user/<int:user_id>')
-@login_required
-def delete_user(user_id):
-    if not current_user.is_admin:
-        flash("Access denied", "danger")
-        return redirect(url_for('index'))
-    user = User.query.get_or_404(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash("User deleted", "success")
-    return redirect(url_for('admin'))
+    return render_template('scan.html', form=form)
 
 
 if __name__ == '__main__':
