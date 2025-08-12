@@ -5,6 +5,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.security import generate_password_hash, check_password_hash
 from threading import Thread
 import json
 
@@ -34,6 +35,7 @@ def create_tables_and_admin():
         db.create_all()
         admin = User.query.filter_by(username="admin").first()
         if not admin:
+            # Use set_password method to hash correctly
             admin = User(username="admin", email="admin@example.com", is_admin=True)
             admin.set_password("admin123")
             db.session.add(admin)
@@ -70,7 +72,19 @@ def login():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        new_user = User(username=form.username.data, email=form.email.data)
+        # Check if username or email already exist
+        if User.query.filter_by(username=form.username.data).first():
+            flash("Username already taken", "danger")
+            return render_template('register.html', form=form)
+        if User.query.filter_by(email=form.email.data).first():
+            flash("Email already registered", "danger")
+            return render_template('register.html', form=form)
+
+        new_user = User(
+            username=form.username.data,
+            email=form.email.data,
+            is_admin=False
+        )
         new_user.set_password(form.password.data)
         db.session.add(new_user)
         db.session.commit()
@@ -91,7 +105,7 @@ def logout():
 def scan():
     form = ScanForm()
     if form.validate_on_submit():
-        target_ip = form.target.data.strip()
+        target_ip = form.target_ip.data.strip()
         start_port = form.start_port.data
         end_port = form.end_port.data
 
