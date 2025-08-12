@@ -138,6 +138,14 @@ def scan():
 @login_required
 def scan_history():
     scans = Scan.query.filter_by(user_id=current_user.id).order_by(Scan.scan_date.desc()).all()
+
+    # Decode JSON strings to Python lists to avoid using fromjson filter in Jinja2
+    for scan in scans:
+        try:
+            scan.open_ports_decoded = json.loads(scan.open_ports)
+        except Exception:
+            scan.open_ports_decoded = []
+
     return render_template('scan_history.html', scans=scans)
 
 
