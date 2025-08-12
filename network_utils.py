@@ -5,7 +5,7 @@ import json
 from time import sleep
 from models import db, Scan
 
-def scan_ports_thread(scan_id):
+def scan_ports_thread(scan_id, app):
     """
     Thread target function to perform a port scan and update the Scan record in DB.
     """
