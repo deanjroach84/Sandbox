@@ -174,9 +174,9 @@ def delete_user(user_id):
     if not current_user.is_admin:
         abort(403)
     user = User.query.get_or_404(user_id)
-    if user.is_admin:
-        flash("Cannot delete an admin user.", "danger")
-        return redirect(url_for('admin'))
+    # if user.is_admin:
+    #   flash("Cannot delete an admin user.", "danger")
+    #   return redirect(url_for('admin'))
     db.session.delete(user)
     db.session.commit()
     flash(f"User {user.username} has been deleted.", "success")
