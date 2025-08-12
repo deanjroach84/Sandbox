@@ -7,6 +7,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 from threading import Thread
+from flask import abort
 import json
 
 from models import db, User, Scan
@@ -147,6 +148,13 @@ def scan_history():
             scan.open_ports_decoded = []
 
     return render_template('scan_history.html', scans=scans)
+
+@app.route('/admin')
+@login_required
+def admin():
+    if not current_user.is_admin:
+        abort(403)
+    return render_template('admin.html')
 
 
 if __name__ == '__main__':
