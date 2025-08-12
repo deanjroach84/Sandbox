@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
@@ -7,7 +7,6 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.security import generate_password_hash, check_password_hash
 from threading import Thread
-from flask import abort
 import json
 
 from models import db, User, Scan
@@ -37,7 +36,7 @@ def create_tables_and_admin():
         admin = User.query.filter_by(username="admin").first()
         if not admin:
             admin = User(username="admin", email="admin@example.com", is_admin=True)
-            admin.set_password("admin123")  # Assuming User model has set_password method
+            admin.set_password("admin123")
             db.session.add(admin)
             db.session.commit()
 
@@ -72,7 +71,6 @@ def login():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        # Check if username or email already exist
         if User.query.filter_by(username=form.username.data).first():
             flash("Username already taken", "danger")
             return render_template('register.html', form=form)
@@ -125,12 +123,12 @@ def scan():
         db.session.commit()
 
         # Start the scanning thread (daemon)
-        thread = Thread(target=scan_ports_thread, args=(new_scan.id,app))
+        thread = Thread(target=scan_ports_thread, args=(new_scan.id, app))
         thread.daemon = True
         thread.start()
 
         flash(f"Scan started for {target_ip} ports {start_port}-{end_port}", "success")
-        return redirect(url_for('scan_history'))  # Redirect to scan_history to view results
+        return redirect(url_for('scan_history'))
 
     return render_template('scan.html', form=form)
 
@@ -139,22 +137,51 @@ def scan():
 @login_required
 def scan_history():
     scans = Scan.query.filter_by(user_id=current_user.id).order_by(Scan.scan_date.desc()).all()
-
-    # Decode JSON strings to Python lists to avoid using fromjson filter in Jinja2
     for scan in scans:
         try:
             scan.open_ports_decoded = json.loads(scan.open_ports)
         except Exception:
             scan.open_ports_decoded = []
-
     return render_template('scan_history.html', scans=scans)
+
 
 @app.route('/admin')
 @login_required
 def admin():
     if not current_user.is_admin:
         abort(403)
-    return render_template('admin.html')
+    users = User.query.all()
+    return render_template('admin.html', users=users)
+
+
+@app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_admin:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash("Cannot delete an admin user.", "danger")
+        return redirect(url_for('admin'))
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User {user.username} has been deleted.", "success")
+    return redirect(url_for('admin'))
+
+
+@app.route('/admin/promote_user/<int:user_id>', methods=['POST'])
+@login_required
+def promote_user(user_id):
+    if not current_user.is_admin:
+        abort(403)
+    user = User.query.get_or_404(user_id)
+    if user.is_admin:
+        flash(f"User {user.username} is already an admin.", "info")
+    else:
+        user.is_admin = True
+        db.session.commit()
+        flash(f"User {user.username} has been promoted to admin.", "success")
+    return redirect(url_for('admin'))
 
 
 if __name__ == '__main__':
