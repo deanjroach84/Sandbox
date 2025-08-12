@@ -1,38 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Start Scan</title>
-</head>
-<body>
-    <h1>Start a Port Scan</h1>
-    <form method="POST" action="{{ url_for('scan') }}">
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.target.label }}<br>
-            {{ form.target(size=40) }}
-        </p>
-        <p>
-            {{ form.start_port.label }}<br>
-            {{ form.start_port() }}
-        </p>
-        <p>
-            {{ form.end_port.label }}<br>
-            {{ form.end_port() }}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
+{% extends "base.html" %}
+{% block title %}Start Scan{% endblock %}
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul>
-        {% for category, message in messages %}
-          <li style="color: {% if category == 'danger' %}red{% else %}green{% endif %};">
-            {{ message }}
-          </li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-</body>
-</html>
+{% block content %}
+<div class="scan-container">
+  <h2>Start a Port Scan</h2>
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+      {{ form.target.label(class="form-label") }}
+      {{ form.target(class="form-control") }}
+      {% for error in form.target.errors %}
+        <div class="error-msg">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.start_port.label(class="form-label") }}
+      {{ form.start_port(class="form-control") }}
+      {% for error in form.start_port.errors %}
+        <div class="error-msg">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="form-group">
+      {{ form.end_port.label(class="form-label") }}
+      {{ form.end_port(class="form-control") }}
+      {% for error in form.end_port.errors %}
+        <div class="error-msg">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-primary">Start Scan</button>
+  </form>
+</div>
+{% endblock %}
