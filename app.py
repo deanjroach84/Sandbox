@@ -35,12 +35,10 @@ def create_tables_and_admin():
         db.create_all()
         admin = User.query.filter_by(username="admin").first()
         if not admin:
-            # Use set_password method to hash correctly
             admin = User(username="admin", email="admin@example.com", is_admin=True)
-            admin.set_password("admin123")
+            admin.set_password("admin123")  # Assuming User model has set_password method
             db.session.add(admin)
             db.session.commit()
-
 
 create_tables_and_admin()
 
@@ -63,6 +61,7 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user and user.check_password(form.password.data):
             login_user(user)
+            flash("Logged in successfully!", "success")
             return redirect(url_for('index'))
         flash("Invalid credentials", "danger")
     return render_template('login.html', form=form)
@@ -88,7 +87,7 @@ def register():
         new_user.set_password(form.password.data)
         db.session.add(new_user)
         db.session.commit()
-        flash("Account created successfully!", "success")
+        flash("Account created successfully! Please login.", "success")
         return redirect(url_for('login'))
     return render_template('register.html', form=form)
 
@@ -97,6 +96,7 @@ def register():
 @login_required
 def logout():
     logout_user()
+    flash("Logged out successfully.", "success")
     return redirect(url_for('login'))
 
 
@@ -123,12 +123,13 @@ def scan():
         db.session.add(new_scan)
         db.session.commit()
 
+        # Start the scanning thread (daemon)
         thread = Thread(target=scan_ports_thread, args=(new_scan.id,))
         thread.daemon = True
         thread.start()
 
         flash(f"Scan started for {target_ip} ports {start_port}-{end_port}", "success")
-        return redirect(url_for('index'))
+        return redirect(url_for('scan_history'))  # Redirect to scan_history to view results
 
     return render_template('scan.html', form=form)
 
