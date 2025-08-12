@@ -1,5 +1,3 @@
-#app.py
-
 import os
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -7,7 +5,6 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from werkzeug.security import generate_password_hash, check_password_hash
 from threading import Thread
 import json
 
@@ -37,8 +34,8 @@ def create_tables_and_admin():
         db.create_all()
         admin = User.query.filter_by(username="admin").first()
         if not admin:
-            hashed_pw = generate_password_hash("admin123", method='pbkdf2:sha256')
-            admin = User(username="admin", password=hashed_pw, is_admin=True)
+            admin = User(username="admin", email="admin@example.com", is_admin=True)
+            admin.set_password("admin123")
             db.session.add(admin)
             db.session.commit()
 
@@ -61,8 +58,8 @@ def index():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()  # fix: was form.email.data
-        if user and check_password_hash(user.password, form.password.data):
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and user.check_password(form.password.data):
             login_user(user)
             return redirect(url_for('index'))
         flash("Invalid credentials", "danger")
@@ -73,8 +70,8 @@ def login():
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        hashed_pw = generate_password_hash(form.password.data, method='sha256')
-        new_user = User(username=form.username.data, password=hashed_pw)
+        new_user = User(username=form.username.data, email=form.email.data)
+        new_user.set_password(form.password.data)
         db.session.add(new_user)
         db.session.commit()
         flash("Account created successfully!", "success")
