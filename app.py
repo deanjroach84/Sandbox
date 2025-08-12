@@ -5,12 +5,11 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from werkzeug.security import generate_password_hash, check_password_hash
 from threading import Thread
 import json
 
 from models import db, User, Scan
-from forms import LoginForm, RegisterForm, ScanForm
+from forms import LoginForm, RegisterForm, ScanForm, AdminAddUserForm
 from network_utils import scan_ports_thread
 
 # Ensure 'instance' directory exists before DB init
@@ -145,13 +144,28 @@ def scan_history():
     return render_template('scan_history.html', scans=scans)
 
 
-@app.route('/admin')
+@app.route('/admin', methods=['GET', 'POST'])
 @login_required
 def admin():
     if not current_user.is_admin:
         abort(403)
+
+    form = AdminAddUserForm()
+    if form.validate_on_submit():
+        # Check if username exists
+        existing_user = User.query.filter_by(username=form.username.data).first()
+        if existing_user:
+            flash("Username already taken.", "danger")
+        else:
+            new_user = User(username=form.username.data, email="", is_admin=False)
+            new_user.set_password(form.password.data)
+            db.session.add(new_user)
+            db.session.commit()
+            flash(f"User {form.username.data} added successfully!", "success")
+            return redirect(url_for('admin'))
+
     users = User.query.order_by(User.id).all()
-    return render_template('admin.html', users=users)
+    return render_template('admin.html', users=users, form=form)
 
 
 @app.route('/admin/delete_user/<int:user_id>', methods=['POST'])
