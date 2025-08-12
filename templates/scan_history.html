@@ -1,21 +1,52 @@
-#scan_history.html
-
 {% extends "base.html" %}
+
 {% block title %}Scan History{% endblock %}
+
 {% block content %}
-<h1>Your Scan History</h1>
-<table>
-    <tr>
-        <th>Target</th>
-        <th>Result</th>
-        <th>Date</th>
-    </tr>
-    {% for scan in scans %}
-    <tr>
-        <td>{{ scan.target }}</td>
-        <td>{{ scan.result }}</td>
-        <td>{{ scan.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="scan-container">
+  <h2 class="mb-4 text-center">Scan History</h2>
+
+  {% if scans %}
+    <div class="table-responsive">
+      <table class="table table-dark table-hover align-middle">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Target IP</th>
+            <th scope="col">Port Range</th>
+            <th scope="col">Open Ports</th>
+            <th scope="col">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in scans %}
+          <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ scan.target_ip }}</td>
+            <td>{{ scan.start_port }} - {{ scan.end_port }}</td>
+            <td>
+              {% set ports = scan.open_ports | safe %}
+              {% if ports %}
+                {% set ports_list = ports | fromjson %}
+                {% for port in ports_list %}
+                  <span class="badge bg-success">{{ port }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="text-muted">None</span>
+              {% endif %}
+            </td>
+            <td>{{ scan.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-center text-muted">No scans found.</p>
+  {% endif %}
+
+  <div class="text-center mt-4">
+    <a href="{{ url_for('scan') }}" class="btn btn-primary">New Scan</a>
+  </div>
+</div>
 {% endblock %}
