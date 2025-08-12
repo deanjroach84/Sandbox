@@ -1,71 +1,31 @@
 {% extends "base.html" %}
-
 {% block title %}New Scan{% endblock %}
 
 {% block content %}
-<div class="scan-container">
-  <h2 class="mb-4 text-center">Start a New Scan</h2>
-
-  <form method="POST" action="{{ url_for('scan') }}" class="mb-4">
+<h2 class="mb-4">Start a New Scan</h2>
+<form method="POST">
     {{ form.hidden_tag() }}
-
     <div class="mb-3">
-      {{ form.target_ip.label(class="form-label") }}
-      {{ form.target_ip(class="form-control bg-dark text-light", placeholder="e.g. 192.168.0.1") }}
-      {% for error in form.target_ip.errors %}
-        <div class="text-danger small">{{ error }}</div>
-      {% endfor %}
+        {{ form.target_ip.label(class="form-label") }}
+        {{ form.target_ip(class="form-control", placeholder="e.g. 192.168.0.1") }}
+        {% for error in form.target_ip.errors %}
+            <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
     </div>
-
-    <div class="row">
-      <div class="col-md-6 mb-3">
+    <div class="mb-3">
         {{ form.start_port.label(class="form-label") }}
-        {{ form.start_port(class="form-control bg-dark text-light", placeholder="e.g. 20") }}
+        {{ form.start_port(class="form-control") }}
         {% for error in form.start_port.errors %}
-          <div class="text-danger small">{{ error }}</div>
+            <div class="text-danger small">{{ error }}</div>
         {% endfor %}
-      </div>
-      <div class="col-md-6 mb-3">
+    </div>
+    <div class="mb-3">
         {{ form.end_port.label(class="form-label") }}
-        {{ form.end_port(class="form-control bg-dark text-light", placeholder="e.g. 100") }}
+        {{ form.end_port(class="form-control") }}
         {% for error in form.end_port.errors %}
-          <div class="text-danger small">{{ error }}</div>
+            <div class="text-danger small">{{ error }}</div>
         {% endfor %}
-      </div>
     </div>
-
-    <div class="text-center">
-      <button type="submit" class="btn btn-primary px-4">Start Scan</button>
-    </div>
-  </form>
-
-  {% if scan %}
-    <div class="scan-results mt-5">
-      <h4 class="mb-3 text-center">Scan Results</h4>
-
-      <p><strong>Target:</strong> {{ scan.target_ip }}</p>
-      <p><strong>Port Range:</strong> {{ scan.start_port }} - {{ scan.end_port }}</p>
-      <p><strong>Timestamp:</strong> {{ scan.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-
-      <h5>Open Ports:</h5>
-      {% set ports = scan.open_ports | safe %}
-      {% if ports %}
-        {% set ports_list = ports | fromjson %}
-        {% if ports_list %}
-          {% for port in ports_list %}
-            <span class="badge bg-success">{{ port }}</span>
-          {% endfor %}
-        {% else %}
-          <span class="text-muted">None</span>
-        {% endif %}
-      {% else %}
-        <span class="text-muted">None</span>
-      {% endif %}
-
-      <div class="mt-4">
-        <a href="{{ url_for('scan_history') }}" class="btn btn-outline-light">View History</a>
-      </div>
-    </div>
-  {% endif %}
-</div>
+    <button type="submit" class="btn btn-primary">Start Scan</button>
+</form>
 {% endblock %}
