@@ -20,14 +20,13 @@
                 <td>{{ scan.target_ip }}</td>
                 <td>{{ scan.start_port }} - {{ scan.end_port }}</td>
                 <td>
-                    {% set ports = scan.open_ports | safe | fromjson %}
-                    {% if ports %}
-                        {{ ports|join(', ') }}
+                    {% if scan.open_ports_decoded %}
+                        {{ scan.open_ports_decoded | join(', ') }}
                     {% else %}
                         <em>No open ports</em>
                     {% endif %}
                 </td>
-                <td>{{ scan.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ scan.scan_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
             </tr>
             {% endfor %}
         </tbody>
