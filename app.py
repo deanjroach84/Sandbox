@@ -124,7 +124,7 @@ def scan():
         db.session.commit()
 
         # Start the scanning thread (daemon)
-        thread = Thread(target=scan_ports_thread, args=(new_scan.id,))
+        thread = Thread(target=scan_ports_thread, args=(new_scan.id,app))
         thread.daemon = True
         thread.start()
 
