@@ -150,7 +150,7 @@ def scan_history():
 def admin():
     if not current_user.is_admin:
         abort(403)
-    users = User.query.all()
+    users = User.query.order_by(User.id).all()
     return render_template('admin.html', users=users)
 
 
