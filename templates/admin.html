@@ -38,17 +38,21 @@
             <td>{{ user.username }}</td>
             <td>{{ 'Yes' if user.is_admin else 'No' }}</td>
             <td>
-                {% if not user.is_admin %}
+                {% if user.id != current_user.id %}
                 <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete user {{ user.username }}?');">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                 </form>
+                {% if not user.is_admin %}
                 <form method="POST" action="{{ url_for('promote_user', user_id=user.id) }}" style="display:inline;" onsubmit="return confirm('Promote user {{ user.username }} to admin?');">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-sm btn-success ms-2">Promote</button>
                 </form>
                 {% else %}
-                <span class="text-muted">No actions</span>
+                <span class="text-muted ms-2">Already Admin</span>
+                {% endif %}
+                {% else %}
+                <span class="text-muted">No actions (current user)</span>
                 {% endif %}
             </td>
         </tr>
