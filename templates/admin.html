@@ -40,11 +40,11 @@
             <td>
                 {% if not user.is_admin %}
                 <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete user {{ user.username }}?');">
-                    {{ csrf_token() }}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                 </form>
                 <form method="POST" action="{{ url_for('promote_user', user_id=user.id) }}" style="display:inline;" onsubmit="return confirm('Promote user {{ user.username }} to admin?');">
-                    {{ csrf_token() }}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <button type="submit" class="btn btn-sm btn-success ms-2">Promote</button>
                 </form>
                 {% else %}
