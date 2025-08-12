@@ -133,5 +133,12 @@ def scan():
     return render_template('scan.html', form=form)
 
 
+@app.route('/scan_history')
+@login_required
+def scan_history():
+    scans = Scan.query.filter_by(user_id=current_user.id).order_by(Scan.scan_date.desc()).all()
+    return render_template('scan_history.html', scans=scans)
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
