@@ -4,7 +4,6 @@ import socket
 import json
 from time import sleep
 from models import db, Scan
-from app import app  # import your Flask app instance
 
 def scan_ports_thread(scan_id):
     """
