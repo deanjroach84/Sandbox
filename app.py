@@ -61,7 +61,7 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             flash("Logged in successfully!", "success")
-            return redirect(url_for('index'))
+            return redirect(url_for('scan'))
         flash("Invalid credentials", "danger")
     return render_template('login.html', form=form)
 
